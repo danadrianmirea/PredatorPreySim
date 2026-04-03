@@ -1,5 +1,6 @@
 #include "nn/neuron.h"
 #include <cstdlib>
+#include <stdexcept>
 
 using namespace std;
 

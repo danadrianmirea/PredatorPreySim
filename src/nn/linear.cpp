@@ -1,6 +1,7 @@
 #include "nn/neuron.h"
 #include "nn/linear.h"
 #include <cstdlib>
+#include <stdexcept>
 
 using namespace std;
 
