@@ -10,7 +10,7 @@ int main(int argc, char* argv[])
     WorldConfig defaultConfig = WorldConfig();
     
     // Check command line arguments
-    bool visualMode = false;
+    bool visualMode = true;
     if (argc > 1) {
         string arg = argv[1];
         if (arg == "--visual" || arg == "-v") {
