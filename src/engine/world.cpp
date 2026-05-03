@@ -13,6 +13,9 @@ World::World(WorldConfig config) {
     _config = config;
     _predators = vector<Predator>();
     _prey = vector<Prey>();
+    _currentGeneration = 0;
+    _currentTime = 0.0f;
+    _currentTick = 0;
 }
 
 void World::initializeSimulation() {
@@ -171,4 +174,85 @@ void World::reproduceAgents() {
     
     _predators.insert(_predators.end(), newPredators.begin(), newPredators.end());
     _prey.insert(_prey.end(), newPrey.begin(), newPrey.end());
+}
+
+void World::initializeVisualSimulation() {
+    initializeSimulation();
+    _currentGeneration = 1;
+    _currentTime = 0.0f;
+    _currentTick = 0;
+}
+
+bool World::tickVisualSimulation(float& outTime, int& outGeneration) {
+    if (_currentGeneration > _config.numGenerations) {
+        return false; // Simulation complete
+    }
+
+    outGeneration = _currentGeneration;
+    outTime = _currentTime;
+
+    // Update all agents
+    for (auto& predator : _predators) {
+        predator.update(_config.tick);
+        keepAgentInBounds(predator);
+    }
+
+    for (auto& prey : _prey) {
+        prey.update(_config.tick);
+        keepAgentInBounds(prey);
+    }
+
+    _currentTime += _config.tick;
+    _currentTick++;
+    checkForCollisions();
+
+    // Check if generation is complete
+    if (_currentTick >= _config.duration) {
+        endGeneration();
+        _currentGeneration++;
+        _currentTick = 0;
+        _currentTime = 0.0f;
+    }
+
+    return true;
+}
+
+void World::endGeneration() {
+    // Remove predators that didn't eat enough
+    vector<size_t> predatorsToRemove;
+    for (size_t i = 0; i < _predators.size(); i++) {
+        if (_predators[i].getPreyEaten() < _config.predatorHungerThreshold) {
+            predatorsToRemove.push_back(i);
+        }
+    }
+
+    sort(predatorsToRemove.begin(), predatorsToRemove.end(), greater<size_t>());
+    predatorsToRemove.erase(unique(predatorsToRemove.begin(), predatorsToRemove.end()),
+                            predatorsToRemove.end());
+
+    for (size_t idx : predatorsToRemove) {
+        _predators.erase(_predators.begin() + idx);
+    }
+
+    reproduceAgents();
+
+    for (auto& predator : _predators) {
+        predator.resetPreyEaten();
+    }
+}
+
+const std::vector<Predator>& World::getPredators() const {
+    return _predators;
+}
+
+const std::vector<Prey>& World::getPrey() const {
+    return _prey;
+}
+
+const WorldConfig& World::getConfig() const {
+    return _config;
+}
+
+bool World::isSimulationComplete() const {
+    return _currentGeneration > _config.numGenerations;
 }

@@ -37,12 +37,24 @@ public:
     //~World();
 
     void runSimulation();
+    
+    // Visual simulation methods
+    void initializeVisualSimulation();
+    bool tickVisualSimulation(float& outTime, int& outGeneration);
+    const std::vector<Predator>& getPredators() const;
+    const std::vector<Prey>& getPrey() const;
+    const WorldConfig& getConfig() const;
+    bool isSimulationComplete() const;
 
 private:
     WorldConfig _config;
 
     std::vector<Predator> _predators;
     std::vector<Prey> _prey;
+
+    int _currentGeneration;
+    float _currentTime;
+    int _currentTick;
 
     void keepAgentInBounds(Agent& agent);
     void checkForCollisions();
@@ -51,4 +63,5 @@ private:
     void printGenerationState(float time, std::ofstream& outfile);
     void printSimulationState(int generation, std::ofstream& outfile);
     void runGeneration(int generation, std::ofstream& outfile);
+    void endGeneration();
 };
